@@ -192,6 +192,10 @@ static void MX_USART1_UART_Init(void)
 	GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
 	LL_GPIO_Init(RS485_GPIO_Port, &GPIO_InitStruct);
 
+	// USART1 interrupt Init
+	NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 8, 0));
+	NVIC_EnableIRQ(USART1_IRQn);
+
 	LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_SYSCLK);
 
 	// TX/RX direction
