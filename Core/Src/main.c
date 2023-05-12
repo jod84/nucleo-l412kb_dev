@@ -31,7 +31,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 char buffer[50] = {0};
 static uint8_t msgLen = 2;
-static void transmitData(void);
+static void uart_transmitData(void);
 /* USER CODE END 0 */
 
 /**
@@ -286,19 +286,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void USART_CharReception_Callback(void)
+void uart_rx_callback(void)
 {
 	uint8_t received_char;
 	received_char = LL_USART_ReceiveData8(USART1);
-	if( (received_char == 'E') || (received_char == 'e') ) {
-		buffer[msgLen++] = received_char;
-		DBG_LED_Toggle();
-	}
-	else if (received_char == 0x0D) {
+	if (received_char == 0x0D) { // if carriage return CR character received, finalize string and send back.
 		buffer[msgLen++] = 0x0A;
 		buffer[msgLen++] = received_char;
 		buffer[msgLen++] = received_char;
-		transmitData();
+		uart_transmitData(); // send back string
 		msgLen = 2;
 	}
 	else {
@@ -306,7 +302,7 @@ void USART_CharReception_Callback(void)
 	}
 }
 
-void transmitData(void) {
+void uart_transmitData(void) {
 
 	LL_USART_DisableIT_RXNE(USART1);
 	RS485_TxEnable();

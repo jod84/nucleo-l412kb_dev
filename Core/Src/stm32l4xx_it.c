@@ -206,7 +206,7 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	USART_CharReception_Callback();
+	uart_rx_callback();
   /* USER CODE END USART1_IRQn 0 */
 
 }
