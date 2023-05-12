@@ -28,11 +28,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-extern uint8_t j;
-extern uint8_t J;
-extern uint8_t x;
-extern char buffer[50];
-static uint8_t rx_msglen = 0;
 
 /* USER CODE END TD */
 
@@ -211,29 +206,7 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	if (LL_USART_IsActiveFlag_RXNE(USART1) && LL_USART_IsEnabledIT_RXNE(USART1))
-	{
-		buffer[rx_msglen++] = LL_USART_ReceiveData8(USART1);
-		if ( ( rx_msglen > 0 &&  rx_msglen < 11) && buffer[rx_msglen-1] == '\r')
-		{
-			buffer[rx_msglen-1] = 0x0A;
-			buffer[rx_msglen+1] = 0x0D;
-			buffer[rx_msglen+2] = ' ';
-			J = rx_msglen+1;
-			x = 1;
-			RS485_TxEnable();
-			rx_msglen = 0;
-		}
-		else if (  rx_msglen >= 11 )
-		{
-			const char err[10] = {0x45, 0x72, 0x72, 0x6f, 0x72, 0x0D, 0x0A, 0x0, 0x0, 0x0};
-			memcpy(buffer, err, 10);
-			J = 8;
-			x = 1;
-			RS485_TxEnable();
-			rx_msglen = 0;
-		}
-	}// while(!LL_USART_IsActiveFlag_TXE(USART1));
+	USART_CharReception_Callback();
   /* USER CODE END USART1_IRQn 0 */
 
 }

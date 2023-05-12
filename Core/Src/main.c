@@ -30,9 +30,8 @@ static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN 0 */
 char buffer[50] = {0};
-uint8_t j = 0;
-uint8_t J = 0;
-uint8_t x = 0;
+static uint8_t msgLen = 2;
+static void transmitData(void);
 /* USER CODE END 0 */
 
 /**
@@ -73,49 +72,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   //RS485_TxEnable();
   LL_USART_EnableIT_RXNE(USART1);
+  LL_USART_EnableIT_ERROR(USART1);
+  buffer[0] = 0x0D;
+  buffer[1] = 0x0A;
   while (1)
   {
 
       /* USER CODE END WHILE */
-	  /*LL_USART_TransmitData8(USART1, (uint8_t)payload[i++]);
-	  while(!LL_USART_IsActiveFlag_TXE(USART1)); // When the transmit shift-register has transmitted data in TDR to TX pin the TXE flag is set by HW.
-	  if(i==6){
-		  i= 0;
-	  }*/
-
-	  if (j < J && x == 1)
-	  {
-		  LL_USART_DisableIT_RXNE(USART1);
-		  LL_USART_TransmitData8(USART1, (uint8_t)buffer[j++]);
-		  while(!LL_USART_IsActiveFlag_TXE(USART1));
-	  }
-
-	  if (j == J-1 && x == 1)
-	  {
-		  j = 0;
-		  x = 0;
-		  RS485_TxDisable();
-		  LL_USART_EnableIT_RXNE(USART1);
-	  }
 	  // LL_USART_IsActiveFlag_IDLE // Check if the USART IDLE line detected Flag is set or not.
 
 	  // LL_USART_EnableIT_RXNE  // CR1 RXNEIE LL_USART_EnableIT_RXNE RXNEIE - RX Not Empty Interrupt Enabled
 	  // LL_USART_IsEnabledIT_RXNE // CR1 RXNEIE LL_USART_IsEnabledIT_RXNE
 	  // LL_USART_DisableIT_RXNE // CR1 RXNEIE LL_USART_DisableIT_RXNE
-	  /*if(LL_USART_IsActiveFlag_RXNE(USART1)) { //Check if the USART Read Data Register Not Empty Flag is set or not.
-		  uint8_t index = 0;
-		  while ((uint8_t)(USART1->RDR)){
-			  payload[index] = (uint8_t)LL_USART_ReceiveData8(USART1);
-			  LL_USART_RequestRxDataFlush(USART1);
-			  index++;
-			  if(index > 254){
-				  DBG_LED_Toggle();
-				  break;
-			  }
-		  }
-		  LL_USART_RequestRxDataFlush(USART1);
-
-	  }*/
 	  // LL_USART_EnableIT_TXE // Enable TX Empty Interrupt. CR1 TXEIE LL_USART_EnableIT_TXE
 	  // LL_USART_DisableIT_TXE // CR1 TXEIE LL_USART_DisableIT_TXE
 	  // LL_USART_IsActiveFlag_TC //Check if the USART Transmission Complete Flag is set or not. ISR TC LL_USART_IsActiveFlag_TC
@@ -318,6 +286,40 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void USART_CharReception_Callback(void)
+{
+	uint8_t received_char;
+	received_char = LL_USART_ReceiveData8(USART1);
+	if( (received_char == 'E') || (received_char == 'e') ) {
+		buffer[msgLen++] = received_char;
+		DBG_LED_Toggle();
+	}
+	else if (received_char == 0x0D) {
+		buffer[msgLen++] = 0x0A;
+		buffer[msgLen++] = received_char;
+		buffer[msgLen++] = received_char;
+		transmitData();
+		msgLen = 2;
+	}
+	else {
+		buffer[msgLen++] = received_char;
+	}
+}
+
+void transmitData(void) {
+
+	LL_USART_DisableIT_RXNE(USART1);
+	RS485_TxEnable();
+	uint8_t pos = 0;
+	while (pos < msgLen) {
+		const uint8_t tmp = (uint8_t)buffer[pos++];
+	    LL_USART_TransmitData8(USART1, tmp);
+	    while(!LL_USART_IsActiveFlag_TXE(USART1));
+	}
+	RS485_TxDisable();
+	LL_USART_EnableIT_RXNE(USART1);
+
+}
 /* USER CODE END 4 */
 
 /**
