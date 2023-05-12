@@ -29,7 +29,10 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN 0 */
-
+char buffer[50] = {0};
+uint8_t j = 0;
+uint8_t J = 0;
+uint8_t x = 0;
 /* USER CODE END 0 */
 
 /**
@@ -58,25 +61,42 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  const char payload[8] = "Kamin\r\n";
+  //const char payload[8] = "Kamin\r\n";
+  //const char payload[6] = "Kamin";
+
   //const uint8_t payload[8] = {0x4b, 0x61, 0x6d, 0x69, 0x6e, 0x0D, 0x0A};
-  uint8_t i = 0;
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  RS485_TxEnable();
+  //RS485_TxEnable();
+  LL_USART_EnableIT_RXNE(USART1);
   while (1)
   {
 
       /* USER CODE END WHILE */
-	  LL_USART_TransmitData8(USART1, (uint8_t)payload[i++]);
+	  /*LL_USART_TransmitData8(USART1, (uint8_t)payload[i++]);
 	  while(!LL_USART_IsActiveFlag_TXE(USART1)); // When the transmit shift-register has transmitted data in TDR to TX pin the TXE flag is set by HW.
-	  if(i==8){
+	  if(i==6){
 		  i= 0;
+	  }*/
+
+	  if (j < J && x == 1)
+	  {
+		  LL_USART_DisableIT_RXNE(USART1);
+		  LL_USART_TransmitData8(USART1, (uint8_t)buffer[j++]);
+		  while(!LL_USART_IsActiveFlag_TXE(USART1));
 	  }
 
+	  if (j == J-1 && x == 1)
+	  {
+		  j = 0;
+		  x = 0;
+		  RS485_TxDisable();
+		  LL_USART_EnableIT_RXNE(USART1);
+	  }
 	  // LL_USART_IsActiveFlag_IDLE // Check if the USART IDLE line detected Flag is set or not.
 
 	  // LL_USART_EnableIT_RXNE  // CR1 RXNEIE LL_USART_EnableIT_RXNE RXNEIE - RX Not Empty Interrupt Enabled
@@ -298,7 +318,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
 /* USER CODE END 4 */
 
 /**
