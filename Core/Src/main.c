@@ -20,7 +20,8 @@
 #include "main.h"
 
 /* USER CODE BEGIN PV */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -29,7 +30,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN 0 */
-char buffer[50] = {0};
+char buffer[255] = {0};
 static uint8_t msgLen = 2;
 static void uart_transmitData(void);
 /* USER CODE END 0 */
@@ -73,35 +74,20 @@ int main(void)
   //RS485_TxEnable();
   LL_USART_EnableIT_RXNE(USART1);
   LL_USART_EnableIT_ERROR(USART1);
+  buffer[0] = 0x0A;
+  buffer[1] = 0x0D;
+  uart_transmitData();
+  const char welcome[54] = "\tPlease type a string with a length less than 255.\n\n\r";
+  memcpy(buffer, welcome, 53);
+  msgLen = 53;
+  uart_transmitData();
   buffer[0] = 0x0D;
   buffer[1] = 0x0A;
   while (1)
   {
-
       /* USER CODE END WHILE */
-	  // LL_USART_IsActiveFlag_IDLE // Check if the USART IDLE line detected Flag is set or not.
-
-	  // LL_USART_EnableIT_RXNE  // CR1 RXNEIE LL_USART_EnableIT_RXNE RXNEIE - RX Not Empty Interrupt Enabled
-	  // LL_USART_IsEnabledIT_RXNE // CR1 RXNEIE LL_USART_IsEnabledIT_RXNE
-	  // LL_USART_DisableIT_RXNE // CR1 RXNEIE LL_USART_DisableIT_RXNE
-	  // LL_USART_EnableIT_TXE // Enable TX Empty Interrupt. CR1 TXEIE LL_USART_EnableIT_TXE
-	  // LL_USART_DisableIT_TXE // CR1 TXEIE LL_USART_DisableIT_TXE
-	  // LL_USART_IsActiveFlag_TC //Check if the USART Transmission Complete Flag is set or not. ISR TC LL_USART_IsActiveFlag_TC
-	  // LL_USART_IsActiveFlag_TXE //Check if the USART Transmit Data Register Empty Flag is set or not. ISR TXE LL_USART_IsActiveFlag_TXE
-
-	  //LL_USART_IsActiveFlag_PE //Check if the USART Parity Error Flag is set or not. ISR PE LL_USART_IsActiveFlag_PE
-	  //LL_USART_IsActiveFlag_FE //Check if the USART Framing Error Flag is set or not. ISR FE LL_USART_IsActiveFlag_FE
-	  // LL_USART_IsActiveFlag_NE //Check if the USART Noise error detected Flag is set or not. ISR NF LL_USART_IsActiveFlag_NE
-	  // LL_USART_IsActiveFlag_ORE // Check if the USART OverRun Error Flag is set or not. ISR ORE LL_USART_IsActiveFlag_ORE
-
-	  // Nothing has gotten loaded. The output buffer should be lowered
-	  			// So that we are prepared for reception.
-	  			// Enable the transmit complete interrupt and disable it there instead
-	  			//LL_USART_ClearFlag_TC(USARTSettings[id].pxUSART);
-	  			//LL_USART_EnableIT_TC(USARTSettings[id].pxUSART);
-
-    /* USER CODE BEGIN 3 */
   }
+  /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 
@@ -295,7 +281,7 @@ void uart_rx_callback(void)
 		buffer[msgLen++] = received_char;
 		buffer[msgLen++] = received_char;
 		uart_transmitData(); // send back string
-		msgLen = 2;
+		//msgLen = 2;
 	}
 	else {
 		buffer[msgLen++] = received_char;
@@ -310,10 +296,14 @@ void uart_transmitData(void) {
 	while (pos < msgLen) {
 		const uint8_t tmp = (uint8_t)buffer[pos++];
 	    LL_USART_TransmitData8(USART1, tmp);
-	    while(!LL_USART_IsActiveFlag_TXE(USART1));
+	    while(!LL_USART_IsActiveFlag_TXE(USART1)); // Wait until the data in TDR has been loaded to the TX shift-register.
 	}
+	// To ensure that the transmit of the last bit has been finalized i.e., that the transmit from
+	// tx shift-register to tx pin is complete, await the Transmit Complete to be set.
+	while(!LL_USART_IsActiveFlag_TC(USART1));
 	RS485_TxDisable();
 	LL_USART_EnableIT_RXNE(USART1);
+	msgLen = 2;
 
 }
 /* USER CODE END 4 */
