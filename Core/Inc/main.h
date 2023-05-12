@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_crs.h"
 #include "stm32l4xx_ll_rcc.h"
 #include "stm32l4xx_ll_bus.h"
@@ -35,7 +36,6 @@ extern "C" {
 #include "stm32l4xx_ll_cortex.h"
 #include "stm32l4xx_ll_utils.h"
 #include "stm32l4xx_ll_pwr.h"
-#include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_usart.h"
 #include "stm32l4xx_ll_gpio.h"
 
@@ -71,22 +71,22 @@ void uart_rx_callback(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define OSC32_IN_Pin LL_GPIO_PIN_14
-#define OSC32_IN_GPIO_Port GPIOC
-#define OSC32_OUT_Pin LL_GPIO_PIN_15
-#define OSC32_OUT_GPIO_Port GPIOC
-#define RS485_TX_Pin LL_GPIO_PIN_9
-#define RS485_TX_GPIO_Port GPIOA
-#define RS485_RX_Pin LL_GPIO_PIN_10
-#define RS485_RX_GPIO_Port GPIOA
-#define RS485_TXDE_Pin LL_GPIO_PIN_12
-#define RS485_TXDE_GPIO_Port GPIOA
-#define SWDIO_Pin LL_GPIO_PIN_13
-#define SWDIO_GPIO_Port GPIOA
-#define SWCLK_Pin LL_GPIO_PIN_14
-#define SWCLK_GPIO_Port GPIOA
-#define DBG_LED_Pin LL_GPIO_PIN_3
-#define DBG_LED_GPIO_Port GPIOB
+#define OSC32_IN_Pin				LL_GPIO_PIN_14
+#define OSC32_IN_GPIO_Port 			GPIOC
+#define OSC32_OUT_Pin 				LL_GPIO_PIN_15
+#define OSC32_OUT_GPIO_Port 		GPIOC
+#define RS485_TX_Pin 				LL_GPIO_PIN_9
+#define RS485_TX_GPIO_Port 			GPIOA
+#define RS485_RX_Pin 				LL_GPIO_PIN_10
+#define RS485_RX_GPIO_Port 			GPIOA
+#define RS485_TXDE_Pin 				LL_GPIO_PIN_12
+#define RS485_TXDE_GPIO_Port 		GPIOA
+#define SWDIO_Pin 					LL_GPIO_PIN_13
+#define SWDIO_GPIO_Port 			GPIOA
+#define SWCLK_Pin 					LL_GPIO_PIN_14
+#define SWCLK_GPIO_Port 			GPIOA
+#define DBG_LED_Pin 				LL_GPIO_PIN_3
+#define DBG_LED_GPIO_Port 			GPIOB
 #ifndef NVIC_PRIORITYGROUP_0
 #define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
                                                                  4 bits for subpriority */
