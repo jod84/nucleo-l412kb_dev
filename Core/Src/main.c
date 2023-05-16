@@ -56,7 +56,7 @@ static void MX_DMA_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-char buffer[255] = {0};
+char buffer[75] = {0};
 static uint8_t msgLen = 2;
 static void uart_transmitData(void);
 static void configureUartDma(const uint32_t dmaDir);
