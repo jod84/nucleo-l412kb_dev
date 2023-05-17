@@ -59,6 +59,7 @@ AS_INCLUDES =
 
 ## C INCLUDES
 C_INCLUDES =  \
+ -IConfig/Inc \
  -ICore/Inc \
  -IDrivers/CMSIS/Device/ST/STM32L4xx/Include \
  -IDrivers/CMSIS/Include \
