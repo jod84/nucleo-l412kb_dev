@@ -15,9 +15,22 @@
 #include "stm32l4xx_ll_rcc.h"		// Already included in uart.h, but for simplicity...
 #include "stdint.h"
 
+extern uint8_t buffer[75];
+
+static void set_uart_dma_addresses() {
+
+	LL_USART_DisableDMAReq_RX(USART1);
+	LL_DMA_SetPeriphAddress(DMA1, UART_RX_DMA_CHANNEL, (uint32_t) &(USART1->RDR));
+	LL_DMA_SetMemoryAddress(DMA1, UART_RX_DMA_CHANNEL, buffer);
+	uint8_t msgSize = sizeof(buffer)/sizeof(uint8_t);
+	LL_DMA_SetDataLength(DMA1, UART_RX_DMA_CHANNEL, msgSize);
+	LL_USART_EnableDMAReq_RX(USART1);
+	LL_DMA_EnableChannel(DMA1, UART_RX_DMA_CHANNEL);
+}
 
 static void setup_uart_dma(uint32_t dmaChannel, IRQn_Type dmaChannelIRQ, uint8_t  priority) {
 
+	// Enable Transfer Complete and Transfer Error interrupts
 	LL_DMA_EnableIT_TC(UART_DMA, dmaChannel);
 	LL_DMA_EnableIT_TE(UART_DMA, dmaChannel);
 
@@ -190,6 +203,8 @@ void uartInit(void) {
 	setup_uart_dma(UART_TX_DMA_CHANNEL, UART_TX_DMA_IRQ, PRIORITY_INTERRUPT_UART_TX);
 	// Setup DMA for UART rx
 	setup_uart_dma(UART_RX_DMA_CHANNEL, UART_RX_DMA_IRQ, PRIORITY_INTERRUPT_UART_RX);
+
+	set_uart_dma_addresses();
 
 	// #CLEAR UART
 
